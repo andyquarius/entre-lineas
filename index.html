@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entre Líneas</title>
+<meta name="theme-color" content="#0b090d">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{
+  --bg:#09080b;--panel:#121016;--panel2:#17131b;--ink:#f6f0f5;--muted:#9d939f;
+  --line:#2b2430;--pink:#e8bfd5;--lilac:#cfb5ff;--green:#9bd8b0;--danger:#e59a9a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh;background:
+radial-gradient(circle at 15% 0%,rgba(112,65,133,.17),transparent 30%),
+radial-gradient(circle at 85% 20%,rgba(130,65,85,.12),transparent 28%),var(--bg)}
+button,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+.screen{min-height:100vh;display:grid;place-items:center;padding:24px}
+.intro{width:min(980px,100%);display:grid;grid-template-columns:1.1fr .9fr;border:1px solid var(--line);
+background:rgba(18,16,22,.94);border-radius:28px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.45)}
+.cover{min-height:620px;background:
+linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.48)),
+url('cover.png') center/cover no-repeat,
+linear-gradient(145deg,#2b1e2d,#151018)}
+.coverFallback{display:none}
+.start{padding:54px 44px;display:flex;flex-direction:column;justify-content:center}
+.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+h1{font-family:Georgia,serif;font-size:52px;font-weight:500;margin:0 0 10px}
+.tag{font-family:Georgia,serif;color:#ddd4df;font-size:17px;line-height:1.55;margin:0 0 34px}
+.who{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.rolegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.role{padding:18px;border-radius:16px;border:1px solid var(--line);background:#0d0b10;color:var(--ink);font-weight:700}
+.role:hover{border-color:#594664;background:#151019}
+.smallprint{font-size:11px;color:#756d79;line-height:1.5;margin-top:20px}
+
+.app{max-width:1220px;margin:0 auto;padding:24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.logo{font-family:Georgia,serif;font-size:24px}
+.conn{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:#655f68}
+.dot.live{background:var(--green);box-shadow:0 0 0 4px rgba(155,216,176,.09)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
+.story{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--panel);box-shadow:0 18px 60px rgba(0,0,0,.3)}
+.hero{position:relative;min-height:310px;background:
+linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.78)),
+url('cover.png') center 42%/cover no-repeat,
+linear-gradient(145deg,#2b1e2d,#151018)}
+.heroCopy{position:absolute;left:0;right:0;bottom:0;padding:34px}
+.heroCopy .kicker{margin-bottom:8px}
+.heroCopy h2{font-family:Georgia,serif;font-weight:500;font-size:38px;margin:0 0 8px}
+.heroCopy p{font-family:Georgia,serif;max-width:700px;margin:0;color:#ded5df;line-height:1.55}
+.premise{padding:24px 28px;border-bottom:1px solid var(--line);font-family:Georgia,serif;font-size:16px;line-height:1.72;color:#e3dbe4;white-space:pre-line}
+.turns{padding:22px;display:flex;flex-direction:column;gap:14px;min-height:220px;max-height:520px;overflow:auto}
+.empty{font-family:Georgia,serif;font-style:italic;color:var(--muted);padding:18px 4px}
+.turn{border:1px solid var(--line);border-radius:16px;padding:16px 17px;background:var(--panel2)}
+.turn.mine{border-color:#43354d}
+.turnhead{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}
+.author{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--lilac)}
+.time{font-size:11px;color:#6f6772}
+.turntext{font-family:Georgia,serif;font-size:17px;line-height:1.65;white-space:pre-wrap}
+.realrow{margin-top:11px}
+.realbtn{border:1px solid var(--line);background:#0e0c11;color:#d8cedb;border-radius:999px;padding:7px 10px;font-size:12px}
+.reveal{font-size:12px;color:var(--pink);margin-top:9px}
+.composer{border-top:1px solid var(--line);padding:18px;background:#0e0c11}
+.next{font-size:12px;color:var(--muted);margin-bottom:10px}
+.next strong{color:var(--ink)}
+textarea{width:100%;min-height:128px;border-radius:15px;border:1px solid var(--line);background:#0a090c;color:var(--ink);padding:14px;resize:vertical;outline:none;line-height:1.55}
+textarea:focus{border-color:#5a4567}
+.ctools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.check{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.check input{accent-color:#c6a2ef}
+.primary{border:0;border-radius:12px;padding:11px 16px;font-weight:800;background:linear-gradient(135deg,var(--lilac),var(--pink));color:#170f18}
+.primary:disabled{opacity:.42;cursor:not-allowed}
+.side{display:flex;flex-direction:column;gap:16px}
+.card{border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--panel)}
+.card h3{margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.invite{font-family:Georgia,serif;color:#ddd4df;line-height:1.55;margin:0 0 14px}
+.ghost{width:100%;border:1px solid var(--line);background:#0e0c11;color:var(--ink);border-radius:12px;padding:10px 12px}
+.ghost:hover{border-color:#51415c}
+.inviteLink{font-size:11px;line-height:1.4;color:#9f91a4;word-break:break-all;background:#0d0b10;border:1px dashed #403548;border-radius:10px;padding:10px;margin-top:10px}
+.rule{font-size:13px;line-height:1.5;color:#d8cfd9;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.rule:last-child{border-bottom:0}
+.nudge{font-family:Georgia,serif;font-size:14px;line-height:1.5;color:#ddd5df;background:#0e0c11;border:1px solid var(--line);padding:13px;border-radius:12px;min-height:74px}
+.sideBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.danger{color:#d9a0a0}
+.badge{display:inline-block;padding:5px 8px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted);margin-bottom:10px}
+.wait{font-family:Georgia,serif;font-size:26px;margin:0 0 10px}
+@media(max-width:900px){
+  .intro{grid-template-columns:1fr}.cover{min-height:320px}.start{padding:34px 24px}h1{font-size:42px}
+  .layout{grid-template-columns:1fr}.side{order:-1}.hero{min-height:240px}
+}
+</style>
+</head>
+<body>
+
+<section id="startScreen" class="screen">
+  <div class="intro">
+    <div class="cover"></div>
+    <div class="start">
+      <div class="kicker">A private story for two</div>
+      <h1>Entre Líneas</h1>
+      <p class="tag">One story. Two writers. Somewhere between fiction and confession, the lesson changes subject.</p>
+      <div class="who">Who are you?</div>
+      <div class="rolegrid">
+        <button class="role" data-role="Andy">ANDY</button>
+        <button class="role" data-role="Samar">SAMAR</button>
+      </div>
+      <div class="smallprint">For consenting adults. Either person can stop or change direction at any time.</div>
+    </div>
+  </div>
+</section>
+
+<section id="appScreen" class="app hidden">
+  <div class="top">
+    <div class="logo">Entre Líneas</div>
+    <div class="conn"><span id="dot" class="dot"></span><span id="status">Preparing room…</span></div>
+  </div>
+
+  <div class="layout">
+    <main class="story">
+      <div class="hero">
+        <div class="heroCopy">
+          <div class="kicker">Tonight's story</div>
+          <h2>The Spanish Lesson</h2>
+          <p>Barcelona. A storm. A teacher who keeps getting the address wrong. A lesson that has not started yet.</p>
+        </div>
+      </div>
+
+      <div class="premise" id="premise"></div>
+      <div class="turns" id="turns"></div>
+
+      <div class="composer">
+        <div class="next">Next turn: <strong id="nextAuthor">Samar</strong></div>
+        <textarea id="composer" maxlength="900" placeholder="Write 2–5 sentences. Leave something unresolved…"></textarea>
+        <div class="ctools">
+          <label class="check">
+            <input type="checkbox" id="secretReal">
+            Something in this turn is something I genuinely want.
+          </label>
+          <button class="primary" id="send">Add my turn</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="side">
+      <div id="inviteCard" class="card hidden">
+        <div class="badge">YOU ARE ANDY</div>
+        <h3>Invite Samar</h3>
+        <p class="invite">Send her one link. She opens it and joins as Samar automatically.</p>
+        <button class="ghost" id="copyInvite">Copy invitation link</button>
+        <div class="inviteLink" id="inviteLink">Creating room…</div>
+      </div>
+
+      <div id="waitingCard" class="card hidden">
+        <div class="badge">YOU ARE SAMAR</div>
+        <p class="wait">Connecting to Andy…</p>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Keep this page open. The story will appear as soon as the private session connects.</div>
+      </div>
+
+      <div class="card">
+        <h3>The only rules</h3>
+        <div class="rule">Write 2–5 sentences.</div>
+        <div class="rule">Leave something unresolved for the other person.</div>
+        <div class="rule">You can secretly mark a turn as containing a real desire.</div>
+        <div class="rule">The other person can call <strong>Real?</strong> and reveal the truth.</div>
+      </div>
+
+      <div class="card">
+        <h3>Need a push?</h3>
+        <div class="nudge" id="nudge">Make one ordinary detail suddenly feel intimate.</div>
+        <button class="ghost" id="nudgeBtn" style="margin-top:10px">Another nudge</button>
+      </div>
+
+      <div class="card">
+        <div class="sideBtns">
+          <button class="ghost" id="exportBtn">Export</button>
+          <button class="ghost danger" id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+const premise = `Barcelona has been under a weather alert all evening. Rain drums against the windows hard enough to erase the city.
+
+The Spanish professor is Argentine, serious, economical with words. He looks more than he speaks: her mouth, her bare feet, the way the cold draft from the badly closing window raises goosebumps over her skin. A trace of yerba dust is caught in the cuffs of his white shirt.
+
+He has already gone to the wrong building twice, so Samar finally has to run downstairs to find him. In the few seconds it takes, she comes back soaked. Her white tank top and very short shorts were not chosen for rain. The professor is drenched too.
+
+Inside, she points him toward the bathroom, gives him a towel and, after a moment of hesitation, a pink bathrobe.
+
+The lesson has not started yet.`;
+
+const seed = { premise, turns:[], nextAuthor:"Samar", createdAt:Date.now() };
+const nudges = [
+  "Make one ordinary detail suddenly feel intimate.",
+  "Let one character misunderstand the other on purpose.",
+  "Use the rain as an excuse to delay the lesson.",
+  "Write one sentence that could be innocent or provocative.",
+  "Introduce something that is genuinely true about what you want.",
+  "Make one of them ask a question they probably should not ask.",
+  "Give the other person a choice instead of an action.",
+  "Shift the tension without touching anyone.",
+  "Make the pink bathrobe unexpectedly important.",
+  "Let silence do more work than dialogue."
+];
+
+let state = JSON.parse(localStorage.getItem("entreLineasV2State") || "null") || structuredClone(seed);
+let role = null, peer = null, conn = null, isHost = false;
+
+const $ = s => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+
+function save(){ localStorage.setItem("entreLineasV2State", JSON.stringify(state)); }
+function setStatus(t, live=false){ $("#status").textContent=t; $("#dot").classList.toggle("live",live); }
+function fmt(ts){ return new Date(ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}); }
+
+function showApp(){
+  $("#startScreen").classList.add("hidden");
+  $("#appScreen").classList.remove("hidden");
+  $("#premise").textContent = state.premise;
+  render();
+}
+
+function render(){
+  $("#nextAuthor").textContent = state.nextAuthor;
+  const mine = role === state.nextAuthor;
+  $("#composer").disabled = !mine;
+  $("#send").disabled = !mine;
+  $("#composer").placeholder = mine ? "Write 2–5 sentences. Leave something unresolved…" : `Waiting for ${state.nextAuthor}…`;
+
+  const el=$("#turns"); el.innerHTML="";
+  if(!state.turns.length){
+    const d=document.createElement("div"); d.className="empty";
+    d.textContent="Samar writes first.";
+    el.appendChild(d);
+  }else{
+    state.turns.forEach(t=>{
+      const a=document.createElement("article"); a.className="turn"+(t.author===role?" mine":"");
+      const h=document.createElement("div"); h.className="turnhead";
+      h.innerHTML=`<span class="author">${t.author}</span><span class="time">${fmt(t.ts)}</span>`;
+      const x=document.createElement("div"); x.className="turntext"; x.textContent=t.text;
+      a.append(h,x);
+
+      if(t.author!==role && !t.revealed){
+        const rr=document.createElement("div"); rr.className="realrow";
+        const b=document.createElement("button"); b.className="realbtn"; b.textContent="Real?";
+        b.onclick=()=>dispatch({type:"guess",id:t.id});
+        rr.appendChild(b); a.appendChild(rr);
+      }
+      if(t.revealed){
+        const r=document.createElement("div"); r.className="reveal";
+        r.textContent=t.secretReal ? "Yes. Something in that turn was real." : "No. That one was fiction.";
+        a.appendChild(r);
+      }
+      el.appendChild(a);
+    });
+    setTimeout(()=>el.scrollTop=el.scrollHeight,20);
+  }
+}
+
+function addTurn(action){
+  if(action.author!==state.nextAuthor) return;
+  const txt=(action.text||"").trim(); if(!txt) return;
+  state.turns.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+    author:action.author,text:txt,secretReal:!!action.secretReal,revealed:false,ts:Date.now()
+  });
+  state.nextAuthor = action.author==="Andy" ? "Samar" : "Andy";
+  save(); render(); sync();
+}
+function apply(action){
+  if(action.type==="add") addTurn(action);
+  if(action.type==="guess"){
+    const t=state.turns.find(v=>v.id===action.id);
+    if(t){t.revealed=true;save();render();sync();}
+  }
+  if(action.type==="reset"){
+    state=structuredClone(seed);save();render();sync();
+  }
+}
+function dispatch(action){
+  if(conn && conn.open && !isHost) conn.send({type:"action",action});
+  else apply(action);
+}
+function sync(){ if(isHost && conn && conn.open) conn.send({type:"snapshot",state}); }
+
+function bind(c){
+  conn=c;
+  conn.on("open",()=>{
+    setStatus("Connected",true);
+    $("#waitingCard").classList.add("hidden");
+    if(isHost) conn.send({type:"snapshot",state});
+  });
+  conn.on("data",d=>{
+    if(d.type==="snapshot" && !isHost){state=d.state;save();render();}
+    if(d.type==="action" && isHost) apply(d.action);
+  });
+  conn.on("close",()=>setStatus("Disconnected",false));
+  conn.on("error",()=>setStatus("Connection error",false));
+}
+
+function hostAsAndy(){
+  role="Andy"; isHost=true; showApp();
+  $("#inviteCard").classList.remove("hidden");
+  setStatus("Creating private room…",false);
+  peer=new Peer();
+  peer.on("open",id=>{
+    const base=location.href.split("?")[0].split("#")[0];
+    const url=`${base}?role=Samar&room=${encodeURIComponent(id)}`;
+    $("#inviteLink").textContent=url;
+    setStatus("Waiting for Samar",false);
+  });
+  peer.on("connection",c=>{
+    if(conn && conn.open){c.close();return;}
+    bind(c);
+  });
+  peer.on("error",()=>setStatus("Could not create room",false));
+}
+
+function joinAsSamar(room){
+  role="Samar"; isHost=false; showApp();
+  $("#waitingCard").classList.remove("hidden");
+  setStatus("Connecting…",false);
+  peer=new Peer();
+  peer.on("open",()=>bind(peer.connect(room,{reliable:true})));
+  peer.on("error",()=>setStatus("Could not connect",false));
+}
+
+document.querySelectorAll(".role").forEach(b=>{
+  b.onclick=()=>{
+    if(b.dataset.role==="Andy") hostAsAndy();
+    else{
+      const room=prompt("Paste Andy's invitation link or room code:");
+      if(!room) return;
+      let code=room.trim();
+      try{
+        const u=new URL(code);
+        code=u.searchParams.get("room")||code;
+      }catch(e){}
+      joinAsSamar(code);
+    }
+  };
+});
+
+$("#send").onclick=()=>{
+  const text=$("#composer").value.trim(); if(!text) return;
+  dispatch({type:"add",author:role,text,secretReal:$("#secretReal").checked});
+  $("#composer").value=""; $("#secretReal").checked=false;
+};
+$("#nudgeBtn").onclick=()=>$("#nudge").textContent=nudges[Math.floor(Math.random()*nudges.length)];
+$("#copyInvite").onclick=async()=>{
+  const txt=$("#inviteLink").textContent;
+  if(!txt.startsWith("http")) return;
+  await navigator.clipboard.writeText(txt);
+  $("#copyInvite").textContent="Copied";
+  setTimeout(()=>$("#copyInvite").textContent="Copy invitation link",900);
+};
+$("#exportBtn").onclick=()=>{
+  let t=`THE SPANISH LESSON\n\n${state.premise}\n\n`;
+  state.turns.forEach(v=>t+=`${v.author.toUpperCase()}\n${v.text}\n\n`);
+  const blob=new Blob([t],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="entre-lineas-story.txt";a.click();URL.revokeObjectURL(a.href);
+};
+$("#resetBtn").onclick=()=>{if(confirm("Reset the story for both of you?"))dispatch({type:"reset"});};
+
+const autoRole=params.get("role"), room=params.get("room");
+if(autoRole==="Samar" && room) joinAsSamar(room);
+</script>
+</body>
+</html>
